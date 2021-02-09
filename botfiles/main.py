@@ -10,8 +10,8 @@ import re
 TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix = "/", intents = intents, description = "Bot made it by Renzo")
-r = praw.Reddit(client_id='6qNWvZCmoKns2w',
-                client_secret='QOC2q16CXP8CS0S1HZH8QCcbu8kaRQ',
+r = praw.Reddit(os.getenv("CLIENT_ID"),
+                os.getenv("CLIENT_SECRET"),
                 user_agent='Showathrougs')
 page = r.subreddit('Showerthoughts')
 
