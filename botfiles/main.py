@@ -4,7 +4,6 @@ import praw
 import random
 from discord.ext import commands
 from discord.ext import tasks
-from activity import bot_activity
 import re
 
 TOKEN = os.getenv("DISCORD_BOT_TOKEN")
