@@ -4,13 +4,14 @@ import praw
 import random
 from discord.ext import commands
 from discord.ext import tasks
+from activity import bot_activity
 import re
 
 TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix = "/", intents = intents, description = "Bot made it by Renzo")
-r = praw.Reddit(os.getenv("CLIENT_ID"),
-                os.getenv("CLIENT_SECRET"),
+r = praw.Reddit(client_id=os.getenv("CLIENT_ID"),
+                client_secret=os.getenv("CLIENT_SECRET"),
                 user_agent='Showathrougs')
 page = r.subreddit('Showerthoughts')
 
