@@ -42,6 +42,5 @@ async def on_command_error(ctx, error):
         return await ctx.send(f"`Unknow command\nUse {bot.command_prefix}help to see all the commands`")
     raise error
 
-bot.add_cog(bot_activity(bot))
 bot.run(TOKEN)
 
