@@ -1,6 +1,6 @@
 import discord
 import os
-import praw
+import asyncpraw
 import random
 from discord.ext import commands
 from discord.ext import tasks
@@ -21,26 +21,18 @@ bot = commands.Bot(command_prefix="/",
                    intents=intents,
                    description="Bot made it by Renzo")
                    
-r = praw.Reddit(client_id=os.getenv("CLIENT_ID"),
+r = asyncpraw.Reddit(client_id=os.getenv("CLIENT_ID"),
                 client_secret=os.getenv("CLIENT_SECRET"),
                 user_agent='Showathrougs')
-page = r.subreddit('Showerthoughts')
 
 
 # region Commands
 @bot.command(pass_context=True)
 async def shower(ctx):
-    top_posts = page.hot(limit=prefs.postlimits.manual)
-    rnd = random.randint(1, prefs.postlimits.auto - 1)
-    i = 0
-    for post in top_posts:
-        i = i + 1
-        if i == rnd and not post.over_18:
-            await ctx.channel.send(post.title)
-        elif i == rnd and post.over_18:
-            await ctx.channel.send("The auto-shower thought selected for this message was a NSFW post so i cant show "
-                                   "you it :(, since the developer is too lazy to repeat the search he put this "
-                                   "message, Sorry!!!")
+    page = await r.subreddit('Showerthoughts')
+    submission_list = [submission async for submission in page.hot(limit=prefs.postlimits.manual) if
+                       not submission.stickied and not submission.over_18 and not submission.spoiler]
+    await bot.get_channel(prefs.loopchannel).send(random.choice(submission_list).title)
 
 
 @bot.command(pass_context=True)
@@ -69,17 +61,10 @@ async def loophere(ctx):
 # region Tasks
 @tasks.loop(seconds=prefs.looptime)
 async def send_msg():
-    channel = bot.get_channel(prefs.loopchannel)
-    top_posts = page.hot(limit=prefs.postlimits.auto)
-    rnd = random.randint(1, prefs.postlimits.auto - 1)
-    i = 0
-    for post in top_posts:
-        i = i + 1
-        if i == rnd and not post.over_18:
-            await channel.send(f"AUTO:{post.title}")
-        elif i == rnd and post.over_18:
-            await channel.send("The auto-shower thought selected for this message was a NSFW post so i cant show you it"
-                               ":(, since the developer is too lazy to repeat the search he put this message, Sorry!!!")
+    page = await r.subreddit('Showerthoughts')
+    submission_list = [submission async for submission in page.hot(limit=prefs.postlimits.manual) if
+                       not submission.stickied and not submission.over_18 and not submission.spoiler]
+    await bot.get_channel(prefs.loopchannel).send(f"AUTO:{random.choice(submission_list).title}")
 
 
 # endregion
@@ -96,6 +81,8 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         return await ctx.send(f"`Unknown command\nUse {bot.command_prefix}help to see all the commands`")
     raise error
+
+
 # endregion
 
 bot.run(TOKEN)
